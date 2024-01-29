@@ -6,7 +6,7 @@ import { auth } from "@clerk/nextjs";
 import React from "react";
 
 type UpdateEventProps = {
-  params: string;
+  params: { id: string };
 };
 
 const UpdateEvent = async ({ params: { id } }: UpdateEventProps) => {
