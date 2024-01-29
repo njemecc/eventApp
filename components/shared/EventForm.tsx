@@ -26,28 +26,36 @@ import Image from "next/image";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Checkbox } from "../ui/checkbox";
-import { createEvent } from "@/lib/actions/event.actions";
+import { createEvent, updateEvent } from "@/lib/actions/event.actions";
 import { useRouter } from "next/navigation";
+import { IEvent } from "@/lib/mongodb/database/models/event.model";
 type EventFormProps = {
   userId: string;
   type: "Create" | "Update";
+  event?: IEvent;
+  eventId?: string;
 };
 
-const EventForm = ({ userId, type }: EventFormProps) => {
-  const initialValues = eventDefaultValues;
+const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
+  const initialValues =
+    event && type === "Update"
+      ? {
+          ...event,
+          startDateTime: new Date(event.startDateTime),
+          endDateTime: new Date(event.endDateTime),
+        }
+      : eventDefaultValues;
   const [files, setFiles] = useState<File[]>([]);
   const [startDate, setStartDate] = useState(new Date());
   const Router = useRouter();
 
   const { startUpload } = useUploadThing("imageUploader");
 
-  // 1. Define your form.
   const form = useForm<z.infer<typeof eventFormSchema>>({
     resolver: zodResolver(eventFormSchema),
     defaultValues: initialValues,
   });
 
-  // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof eventFormSchema>) {
     const eventData = values;
 
@@ -66,13 +74,35 @@ const EventForm = ({ userId, type }: EventFormProps) => {
       try {
         const newEvent = await createEvent({
           event: { ...values, imageUrl: uploadedImageUrl },
-          userId,
           path: "/profile",
+          userId,
         });
 
         if (newEvent) {
           form.reset();
           Router.push(`/events/${newEvent._id}`);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    if (type === "Update") {
+      if (!eventId) {
+        Router.back();
+        return;
+      }
+
+      try {
+        const updatedEvent = await updateEvent({
+          userId,
+          event: { ...values, imageUrl: uploadedImageUrl, _id: eventId },
+          path: `/events/${eventId}`,
+        });
+
+        if (updatedEvent) {
+          form.reset();
+          Router.push(`/events/${updatedEvent._id}`);
         }
       } catch (error) {
         console.log(error);
@@ -242,8 +272,8 @@ const EventForm = ({ userId, type }: EventFormProps) => {
             name="price"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormControl className="h-72">
-                  <div className="flex-center h-[54px] w-full overflow-hidden rounded-full bg-gray-50 px-4 py-2">
+                <FormControl>
+                  <div className="flex-center h-[54px] w-full overflow-hidden rounded-full bg-grey-50 px-4 py-2">
                     <Image
                       src="/assets/icons/dollar.svg"
                       alt="dollar"
@@ -251,20 +281,18 @@ const EventForm = ({ userId, type }: EventFormProps) => {
                       height={24}
                       className="filter-grey"
                     />
-
                     <Input
                       type="number"
                       placeholder="Price"
                       {...field}
                       className="p-regular-16 border-0 bg-grey-50 outline-offset-0 focus:border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                     />
-
                     <FormField
                       control={form.control}
                       name="isFree"
                       render={({ field }) => (
                         <FormItem>
-                          <FormControl className="h-72">
+                          <FormControl>
                             <div className="flex items-center">
                               <label
                                 htmlFor="isFree"
