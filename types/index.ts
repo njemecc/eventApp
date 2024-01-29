@@ -17,7 +17,6 @@ export type UpdateUserParams = {
 
 // ====== EVENT PARAMS
 export type CreateEventParams = {
-  userId: string;
   event: {
     title: string;
     description: string;
@@ -31,6 +30,7 @@ export type CreateEventParams = {
     url: string;
   };
   path: string;
+  userId: string;
 };
 
 export type UpdateEventParams = {
@@ -107,7 +107,7 @@ export type CreateCategoryParams = {
 export type CheckoutOrderParams = {
   eventTitle: string;
   eventId: string;
-  price: string;
+  price: number;
   isFree: boolean;
   buyerId: string;
 };
