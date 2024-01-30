@@ -31,6 +31,6 @@ export const getAllCategories = async () => {
   }
 };
 
-const getCategoryByName = async (name: string) => {
+export const getCategoryByName = async (name: string) => {
   return Category.findOne({ name: { $regex: name, $options: "i" } });
 };

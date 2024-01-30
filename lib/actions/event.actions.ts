@@ -14,6 +14,7 @@ import {
 import User from "../mongodb/database/models/user.model";
 import Category from "../mongodb/database/models/category.model";
 import { revalidatePath } from "next/cache";
+import { getCategoryByName } from "./category.actions";
 
 const populateEvent = (query: any) => {
   return query
@@ -100,20 +101,32 @@ export const updateEvent = async ({
   }
 };
 
-export const getAllEvents = async ({
+export async function getAllEvents({
   query,
   limit = 6,
   page,
   category,
-}: GetAllEventsParams) => {
+}: GetAllEventsParams) {
   try {
     await connectToDatabase();
 
-    const conditions = {};
+    const titleCondition = query
+      ? { title: { $regex: query, $options: "i" } }
+      : {};
+    const categoryCondition = category
+      ? await getCategoryByName(category)
+      : null;
+    const conditions = {
+      $and: [
+        titleCondition,
+        categoryCondition ? { category: categoryCondition._id } : {},
+      ],
+    };
 
+    const skipAmount = (Number(page) - 1) * limit;
     const eventsQuery = Event.find(conditions)
       .sort({ createdAt: "desc" })
-      .skip(0)
+      .skip(skipAmount)
       .limit(limit);
 
     const events = await populateEvent(eventsQuery);
@@ -126,7 +139,7 @@ export const getAllEvents = async ({
   } catch (error) {
     handleError(error);
   }
-};
+}
 
 export const deleteEvent = async ({ eventId, path }: DeleteEventParams) => {
   try {
