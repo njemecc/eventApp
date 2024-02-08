@@ -14,7 +14,7 @@ const Footer = () => {
             height={38}
           />
         </Link>
-        <p>2024 Events App. All rights reserved.</p>
+        <p>2020201340 Branislav Njemec</p>
       </div>
     </footer>
   );

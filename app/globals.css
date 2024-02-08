@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* colors 
+
+#9ACD32   YellowGreen
+
+#F4F0E7   BEZ
+
+#918358   Smedja
+
+*/
+
 @layer base {
   :root {
     --background: 0 0% 100%;

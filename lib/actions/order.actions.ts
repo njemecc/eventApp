@@ -66,7 +66,7 @@ export const createOrder = async (order: CreateOrderParams) => {
   }
 };
 
-// GET ORDERS BY EVENT
+// orderi po eventu
 export async function getOrdersByEvent({
   searchString,
   eventId,
@@ -128,7 +128,7 @@ export async function getOrdersByEvent({
   }
 }
 
-// GET ORDERS BY USER
+//orderi na osnovu usera
 export async function getOrdersByUser({
   userId,
   limit = 3,
